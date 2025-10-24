@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         bottomNavigationView!!.setOnItemSelectedListener(object :
             NavigationBarView.OnItemSelectedListener {
             override fun onNavigationItemSelected(item: MenuItem): Boolean {
-                val itemId = item.getItemId()
+                val itemId = item.itemId
                 if (itemId == R.id.bottom_home) {
                     openFragment(HomeFragment())
                     return true
@@ -66,18 +66,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         })
 
-
-        fragmentManager = getSupportFragmentManager()
+        fragmentManager = supportFragmentManager
         openFragment(HomeFragment())
 
-        /*
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.drawer_layout), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-        */
+        // 🔹 AGREGAR ESTA LÍNEA (carga los usuarios guardados)
+        UserRepository.loadUsers(this)
     }
+
 
     private fun openFragment(fragment: Fragment) {
         val fragmentTransaction: FragmentTransaction = fragmentManager!!.beginTransaction()
@@ -86,23 +81,34 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val itemId = item.getItemId()
-        if (itemId == R.id.nav_home) {
-            openFragment(HomeFragment())
-        } else if (itemId == R.id.nav_profile) {
-            openFragment(ProfileFragment())
-        } else if (itemId == R.id.nav_settings) {
-            openFragment(SettingFragment())
-        } else if (itemId == R.id.nav_cars) {
-            openFragment(CarsFragment())
-        } else if (itemId == R.id.nav_library) {
-            val intent = Intent(getApplicationContext(), LibraryActivity::class.java)
-            startActivity(intent)
-            finish()
-        } else if (itemId == R.id.nav_logout) {
-            Toast.makeText(this, "Te vas por que yo quiero vayas", Toast.LENGTH_SHORT).show()
-            finishAndRemoveTask()
-            onDestroy()
+        val itemId = item.itemId
+        when (itemId) {
+            R.id.nav_home -> {
+                openFragment(HomeFragment())
+            }
+            R.id.nav_profile -> {
+                openFragment(ProfileFragment())
+            }
+            R.id.nav_settings -> {
+                openFragment(SettingFragment())
+            }
+            R.id.nav_cars -> {
+                openFragment(CarsFragment())
+            }
+            // 🔹 NUEVO BLOQUE: abre la lista de usuarios
+            R.id.nav_users -> {
+                openFragment(UserListFragment())
+            }
+            R.id.nav_library -> {
+                val intent = Intent(applicationContext, LibraryActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+            R.id.nav_logout -> {
+                Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show()
+                finishAndRemoveTask()
+                onDestroy()
+            }
         }
 
         drawerLayout!!.closeDrawer(GravityCompat.START)
